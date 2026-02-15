@@ -12,6 +12,8 @@ The goal of the project is to simulate core data architecture tasks such as:
 - Data quality checks (validation)
 - Simple data lineage tracking
 
+raw data  →  SQL tables  →  clean data  →  reports
+
 ## Tech Skills Involved
 - Python 3
 - SQLite
