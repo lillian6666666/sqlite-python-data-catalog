@@ -43,7 +43,16 @@ def profile_table(con, table_name):
 
     return pd.DataFrame(profile_rows)
 
+def export_returns(con):
+    df_returns = pd.read_sql_query(
+        "SELECT * FROM returns;",
+        con
+    )
 
+    out_path = ROOT / "output" / "daily-returns.csv"
+    df_returns.to_csv(out_path, index=False)
+
+    print("Yay returns exported to:", out_path)
 
 def main():
     # 1 read to panda dataframe
@@ -74,6 +83,10 @@ def main():
 
     # 6) close connection
     con.close()
+    data_dict = profile_table(con, "raw")
+    output_path = ROOT / "output" / "data_dictionary.csv"
+    data_dict.to_csv(output_path, index=False)
+    print("Yay data dictionary saved to:", output_path)
 
 if __name__ == "__main__":
     main()

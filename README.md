@@ -37,4 +37,51 @@ raw data  →  SQL tables  →  clean data  →  reports
 5. Run basic data quality checks (validation)
 6. Export results to output files
 
+## Notes SQL
+To open the sqlite, type in python3 src/build_catalog.py
+
+sqlite3 project.db
+
+Demo 1: 
+SELECT Date, Open, Close
+FROM clean
+LIMIT 5;
+(shows 5 examples)
+
+Demo 2:
+SELECT
+    AVG(Close) AS avg_close,
+    MAX(Close) AS highest_close,
+    MIN(Close) AS lowest_close
+FROM clean;
+(use SQL to summarize historical data)
+
+Demo 3:
+SELECT Date, Close
+FROM clean
+ORDER BY Close DESC
+LIMIT 1;
+(which day is highest close?)
+
+## Notes2: 
+Because daily return = (today close - yesterday close) / yesterday close
+
+DROP TABLE IF EXISTS returns;
+CREATE TABLE returns AS
+SELECT
+    Date,
+    Close,
+    LAG(Close) OVER (ORDER BY Date) AS prev_close,
+    ROUND(
+        (Close - LAG(Close) OVER (ORDER BY Date))
+        / LAG(Close) OVER (ORDER BY Date) * 100,
+        2
+    ) AS daily_return_pct
+FROM clean
+LIMIT 10;
+ 
+
+
+
+
 
