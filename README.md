@@ -33,14 +33,13 @@ raw data  →  SQL tables  →  clean data  →  reports
 4. Generate data dictionary:
    - column names
    - data types
-   - missing values
+   - missing valuessource venv/bin/activate
+
 5. Run basic data quality checks (validation)
 6. Export results to output files
 
 ## Notes SQL
-To open the sqlite, type in python3 src/build_catalog.py
-
-sqlite3 project.db
+To open the sqlite, type in 
 
 Demo 1: 
 SELECT Date, Open, Close
@@ -65,20 +64,14 @@ LIMIT 1;
 
 ## Notes2: 
 Because daily return = (today close - yesterday close) / yesterday close
+cd ~/Desktop/"SQLPython Project"/sqlite-python-data-catalog
+cd sqlite-python-data-catalog
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 src/build_catalog.py
+ls output
 
-DROP TABLE IF EXISTS returns;
-CREATE TABLE returns AS
-SELECT
-    Date,
-    Close,
-    LAG(Close) OVER (ORDER BY Date) AS prev_close,
-    ROUND(
-        (Close - LAG(Close) OVER (ORDER BY Date))
-        / LAG(Close) OVER (ORDER BY Date) * 100,
-        2
-    ) AS daily_return_pct
-FROM clean
-LIMIT 10;
  
 
 
