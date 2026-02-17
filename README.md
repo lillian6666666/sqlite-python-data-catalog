@@ -64,8 +64,8 @@ LIMIT 1;
 
 ## Notes2: 
 Because daily return = (today close - yesterday close) / yesterday close
-cd ~/Desktop/"SQLPython Project"/sqlite-python-data-catalog
-cd sqlite-python-data-catalog
+cd ~/Desktop/"SQL Python Project"/sqlite-python-data-catalog
+
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

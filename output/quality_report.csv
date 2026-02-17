@@ -1,0 +1,7 @@
+check,value
+total_rows_clean,1211
+null_close_rows,0
+null_volume_rows,0
+close<=0_rows,0
+volume<0_rows,0
+duplicate_date_count,0

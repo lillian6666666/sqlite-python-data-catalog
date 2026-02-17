@@ -1,0 +1,8 @@
+table,column,dtype,rows,missing,missing_pct,example_values
+raw,Date,object,1211,0,0.0,"2012-12-13, 2012-12-14, 2012-12-17"
+raw,Open,float64,1211,0,0.0,"15.0, 19.0, 31.5"
+raw,High,float64,1211,0,0.0,"15.0, 30.0, 65.0"
+raw,Low,float64,1211,0,0.0,"15.0, 19.0, 31.5"
+raw,Close,float64,1211,0,0.0,"15.0, 30.0, 65.0"
+raw,Volume,int64,1211,0,0.0,"100, 144600, 68600"
+raw,OpenInt,int64,1211,0,0.0,"0, 0, 0"

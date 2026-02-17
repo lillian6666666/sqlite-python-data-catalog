@@ -14,6 +14,38 @@ DB_PATH = ROOT / "project.db"
     # ↓
 # return a data dictionary
 
+## A0) cleaning step (raw -> clean)
+def build_clean_table(con):
+    con.execute("DROP TABLE IF EXISTS clean;")
+
+    con.execute("""
+        CREATE TABLE clean AS
+        WITH ranked AS (
+            SELECT
+                *,
+                DATE(Date) AS Date_norm,
+
+                -- assign row number per date
+                -- rn = 1 means keep this row (latest by rowid)
+                ROW_NUMBER() OVER (
+                    PARTITION BY DATE(Date) -- used to add row num
+                    ORDER BY rowid DESC
+                ) AS rn
+            FROM raw
+
+            WHERE DATE(Date) IS NOT NULL
+              AND Close IS NOT NULL
+              AND Close > 0
+              AND (Volume IS NULL OR Volume >= 0)
+        )
+
+        SELECT *
+        FROM ranked
+        WHERE rn = 1;
+    """)
+
+
+
 ## A) data dictionary report
 def profile_table(con, table_name):
     # Read SQL table into pandas
@@ -62,7 +94,26 @@ def returns_report(con):
 
     return pd.read_sql_query("SELECT * FROM returns ORDER BY Date;", con)
 
-## C) quality report
+## C) returns stats report
+def returns_stats_report(returns):
+    s = returns["daily_return_pct"]
+
+    stats = pd.DataFrame([{
+        "n_rows": len(returns),
+        "n_missing_returns": int(s.isna().sum()),
+        "mean_return_pct": round(float(s.mean(skipna=True)), 4),
+        "median_return_pct": round(float(s.median(skipna=True)), 4),
+        "std_return_pct": round(float(s.std(skipna=True)), 4),
+        "min_return_pct": round(float(s.min(skipna=True)), 4),
+        "max_return_pct": round(float(s.max(skipna=True)), 4),
+        "pct_positive_days": round(float((s > 0).mean(skipna=True) * 100), 2),
+        "pct_negative_days": round(float((s < 0).mean(skipna=True) * 100), 2),
+    }])
+
+    return stats
+
+
+## D) quality report
 def quality_report(con):
     """Run basic missingness/validity/duplicate checks on the clean table."""
     total_rows = con.execute("SELECT COUNT(*) FROM clean;").fetchone()[0]
@@ -94,7 +145,7 @@ def quality_report(con):
         {"check": "duplicate_date_count", "value": duplicate_dates},
     ])
 
-# D) main
+# E) main
 def main():
     # 1 read to panda dataframe
     df = pd.read_csv(DATA_PATH)
@@ -108,12 +159,8 @@ def main():
     df.to_sql("raw", con, if_exists="replace", index=False)
 
     # 4) created a empty table called clean first from raw, raw → clean → analysis
-    con.execute("DROP TABLE IF EXISTS clean;")
-    con.execute("""
-        CREATE TABLE clean AS
-        SELECT *
-        FROM raw;
-    """)
+    build_clean_table(con)
+
 
     # 5) sanity checks using SQL queries
     raw_count = con.execute("SELECT COUNT(*) FROM raw;").fetchone()[0]
@@ -140,6 +187,12 @@ def main():
     out_path = out_dir / "daily_returns.csv"  
     returns.to_csv(out_path, index=False)
     print("Yay returns exported to:", out_path)
+
+    stats = returns_stats_report(returns)
+    stats_path = out_dir / "returns_stats.csv"
+    stats.to_csv(stats_path, index=False)
+    print("Yay returns stats saved to:", stats_path)
+
 
     con.close()
 
