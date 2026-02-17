@@ -98,6 +98,10 @@ def returns_report(con):
 def returns_stats_report(returns):
     s = returns["daily_return_pct"]
 
+    mean_val = s.mean(skipna=True)
+    std_val = s.std(skipna=True)
+    sharpe_like = mean_val / std_val
+
     stats = pd.DataFrame([{
         "n_rows": len(returns),
         "n_missing_returns": int(s.isna().sum()),
@@ -108,8 +112,11 @@ def returns_stats_report(returns):
         "max_return_pct": round(float(s.max(skipna=True)), 4),
         "pct_positive_days": round(float((s > 0).mean(skipna=True) * 100), 2),
         "pct_negative_days": round(float((s < 0).mean(skipna=True) * 100), 2),
+        "sharpe_like_ratio": round(float(sharpe_like), 4)
     }])
 
+    ## sharpe-like ratio: average return per unit of volatility (std), measures return relative to risk
+    ## Higher Sharpe = better risk-adjusted performance
     return stats
 
 
@@ -145,7 +152,21 @@ def quality_report(con):
         {"check": "duplicate_date_count", "value": duplicate_dates},
     ])
 
-# E) main
+## E) data lineage report
+def lineage_report():
+    # documents how data flows through the pipeline
+    return pd.DataFrame([
+        {"source": "data/raw.csv", "target": "raw (SQL table)", "step": "load_csv"},
+        {"source": "raw (SQL table)", "target": "clean (SQL table)", "step": "clean/filter/deduplicate"},
+        {"source": "clean (SQL table)", "target": "returns (SQL table)", "step": "calculate_daily_returns"},
+        {"source": "returns (SQL table)", "target": "output/daily_returns.csv", "step": "export_returns"},
+        {"source": "returns (DataFrame)", "target": "output/returns_stats.csv", "step": "summary_stats"},
+        {"source": "raw (SQL table)", "target": "output/data_dictionary.csv", "step": "metadata_profile"},
+        {"source": "clean (SQL table)", "target": "output/quality_report.csv", "step": "quality_checks"},
+    ])
+
+
+## F) main
 def main():
     # 1 read to panda dataframe
     df = pd.read_csv(DATA_PATH)
@@ -193,9 +214,14 @@ def main():
     stats.to_csv(stats_path, index=False)
     print("Yay returns stats saved to:", stats_path)
 
+    lineage = lineage_report()
+    lineage_path = out_dir / "data_lineage.csv"
+    lineage.to_csv(lineage_path, index=False)
+    print("Yay lineage saved to:", lineage_path)
 
     con.close()
 
 
 if __name__ == "__main__":
     main()
+
