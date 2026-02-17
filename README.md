@@ -62,10 +62,9 @@ ORDER BY Close DESC
 LIMIT 1;
 (which day is highest close?)
 
-## Notes2: 
+## What user should input in terminal: 
 Because daily return = (today close - yesterday close) / yesterday close
 cd ~/Desktop/"SQL Python Project"/sqlite-python-data-catalog
-
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
