@@ -1,0 +1,8 @@
+source,target,step
+data/raw.csv,raw (SQL table),load_csv
+raw (SQL table),clean (SQL table),clean/filter/deduplicate
+clean (SQL table),returns (SQL table),calculate_daily_returns
+returns (SQL table),output/daily_returns.csv,export_returns
+returns (DataFrame),output/returns_stats.csv,summary_stats
+raw (SQL table),output/data_dictionary.csv,metadata_profile
+clean (SQL table),output/quality_report.csv,quality_checks

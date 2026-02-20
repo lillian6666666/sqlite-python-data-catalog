@@ -1,0 +1,2 @@
+n_rows,n_missing_returns,mean_return_pct,median_return_pct,std_return_pct,min_return_pct,max_return_pct,pct_positive_days,pct_negative_days,sharpe_like_ratio
+1210,1,0.3018,0.03,7.021,-33.41,116.67,50.17,47.77,0.043

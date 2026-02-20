@@ -25,10 +25,8 @@ def build_clean_table(con):
                 *,
                 DATE(Date) AS Date_norm,
 
-                -- assign row number per date
-                -- rn = 1 means keep this row (latest by rowid)
                 ROW_NUMBER() OVER (
-                    PARTITION BY DATE(Date) -- used to add row num
+                    PARTITION BY DATE(Date) 
                     ORDER BY rowid DESC
                 ) AS rn
             FROM raw
@@ -68,7 +66,7 @@ def profile_table(con, table_name):
             "column": col,
             "dtype": str(s.dtype),
             "rows": rows,
-            "missing": int(missing),  # FIX: ensure plain int in output
+            "missing": int(missing),  
             "missing_pct": round(missing_pct, 2),
             "example_values": ", ".join(example_values)
         })
@@ -89,7 +87,7 @@ def returns_report(con):
                 / LAG(Close) OVER (ORDER BY Date) * 100,
                 2
             ) AS daily_return_pct
-        FROM clean;  -- FIX: was FROM {"clean"} which is invalid/weird
+        FROM clean;  
     """)
 
     return pd.read_sql_query("SELECT * FROM returns ORDER BY Date;", con)
